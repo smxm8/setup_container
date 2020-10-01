@@ -14,7 +14,7 @@ do
 done
 
 ssh-keygen -q -f ~/.ssh/$1 -N ""
-lxc file push .ssh/$1.pub $1/root/.ssh/authorized_keys
+lxc file push ~/.ssh/$1.pub $1/root/.ssh/authorized_keys
 lxc exec $1 -- chmod 600 /root/.ssh/authorized_keys
 lxc exec $1 -- chown root:root /root/.ssh/authorized_keys
 
