@@ -13,19 +13,24 @@ do
 	sleep 1
 done
 
-ssh-keygen -q -f ~/.ssh/$1 -N ""
-lxc file push ~/.ssh/$1.pub $1/root/.ssh/authorized_keys
+if [ ! -f ~/.ssh/id_rsa.pub ]
+then
+	ssh-keygen -q -f ~/.ssh/id_rsa -N ""
+fi
+
+lxc file push ~/.ssh/id_rsa.pub $1/root/.ssh/authorized_keys
 lxc exec $1 -- chmod 600 /root/.ssh/authorized_keys
 lxc exec $1 -- chown root:root /root/.ssh/authorized_keys
 
 lxc exec $1 -- apt update
 lxc exec $1 -- apt install -y apache2
 
-
-mkdir ~/$1
-
 IP=`lxc info $1 | grep -Po '\seth\d:\sinet\s+\K[0-9\.]+'`;
 
-sshfs -o StrictHostKeyChecking=accept-new root@$IP:/var/www/html ~/$1/
+if [ -n "$2" ]
+then
+	mkdir -p ~/$2
+	sshfs -o StrictHostKeyChecking=accept-new root@$IP:/var/www/html ~/$2
+fi
 
-echo "Servidor escuchando en http://$IP"
+echo -e "Servidor escuchando en \e[93mhttp://$IP\e[0m"
